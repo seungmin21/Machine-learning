@@ -60,10 +60,49 @@ model.compile(optimizer='adam',
             loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
             metrics=['accuracy'])
 
-model.fit(train_images, train_labels, epochs=10)
+# model.fit(train_images, train_labels, epochs=10)
 
 # 정확도 평가
 test_loss, test_acc = model.evaluate(test_images,  test_labels, verbose=2)
+# print('\nTest accuracy:', test_acc) # Test accuracy: 0.8848999738693237
 
-print('\nTest accuracy:', test_acc) # Test accuracy: 0.8848999738693237
+# 확률 모델
+probability_model = tf.keras.Sequential([model, 
+                                        tf.keras.layers.Softmax()])
 
+# 예측 값
+predictions = probability_model.predict(test_images)
+
+# print(predictions)
+# print(predictions[0])
+
+result = np.argmax(predictions[0])
+# print(result)
+
+# print(test_labels[0])
+
+
+def plot_image(i, predictions_array, true_label, img):
+    true_label, img = true_label[i], img[i]
+    plt.grid(False)
+    # x축의 눈금을 표시하지 않는 함수
+    plt.xticks([])
+    # y축의 눈금을 표시하지 않는 함수
+    plt.yticks([])
+
+    #  cmap=plt.cm.binary 흑백 이미지로 플로팅하도록 지정
+    plt.imshow(img, cmap=plt.cm.binary)
+
+    # 모델의 예측된 레이블
+    # np.argmax(predictions_array) 가장 높은 확률을 가진 클래스를 예측
+    predicted_label = np.argmax(predictions_array)
+    if predicted_label == true_label:
+        color = 'blue'
+    else:
+        color = 'red'
+    
+    # x축 레이블을 지정하는 함수
+    plt.xlabel("{} {:2.0f}% ({})".format(class_names[predicted_label],
+                                100*np.max(predictions_array),
+                                class_names[true_label]),
+                                color=color)
